@@ -12,7 +12,6 @@
 - Add image content
 - Import image from URL
 - Full drag and drop support
-- Change colors and text
 - Export as screenshot image
 - Save the data as file
 
