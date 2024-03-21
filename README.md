@@ -6,17 +6,17 @@
 
 </div>
 
-## FEATURES
+## FEATURES 💡
 - Open Source and FREE
-- Make Categories/Tiers
-- Add image from file
+- Make custom categories/tiers
+- Add images from file
 - Import image directly from URL
 - Full drag and drop support
-- Arrange the content
+- Arrange the content easily
 - Export as screenshot image
-- Save the data as file
+- Save the data as file and reuse
 
-## DOWNLOAD
+## DOWNLOAD 🔻
 
 ### <p align='center'> Windows Version <br> <p align='center'> [<img src="https://img.shields.io/badge/FREE-DOWNLOAD-informational?&logo=Microsoft&logoColor=blue&color=007ec6" width="300">](https://github.com/Akascape/Easy-Tier-List/releases/download/v1.0/easy-tier-list_v1.0_win64.zip)  <p align='center'>
 
@@ -24,7 +24,7 @@
 
 **CURRENT VERSION: 1.0**
 
-## Example
+## Example 🎨
 <div align="center">
   
 ![image](https://github.com/Akascape/Easy-Tier-List/assets/89206401/e33c2ae9-2be6-41b0-8864-d444d1e9ff9d)
@@ -35,11 +35,14 @@
 ![untitled](https://github.com/Akascape/Easy-Tier-List/assets/89206401/9478a912-d65c-4aa0-99e5-0f0a042c2b4d)
 </div>
 
-## How to Install?
+## How to Install? ⚙️
 - For windows users, just extract the downloaded zip file and **run `easy-tier-list.exe`**
 - For python users, install the requirements via pip and run easy-tier-list.py
 
-## License
+## Documentation 📄
+- Check the [wiki](https://github.com/Akascape/Easy-Tier-List/wiki) page
+  
+## License ©️
 [<img src="https://user-images.githubusercontent.com/89206401/168461242-884f25ce-eb67-406a-9d98-cf8d0f28cb43.png" width=100>](https://github.com/Akascape/Ascify-Art/blob/Ascify-Art_v0.6/LICENSE)
 <br>
 
