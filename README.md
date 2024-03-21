@@ -7,7 +7,8 @@
 </div>
 
 ## FEATURES
-- Make Categories
+- Open Source and FREE
+- Make Categories/Tiers
 - Add image content
 - Import image from URL
 - Full drag and drop support
