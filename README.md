@@ -9,13 +9,14 @@
 ## FEATURES
 - Open Source and FREE
 - Make Categories/Tiers
-- Add image content
-- Import image direct from URL
+- Add image from file
+- Import image directly from URL
 - Full drag and drop support
+- Arrange the content
 - Export as screenshot image
 - Save the data as file
 
-## Examples
+## Example
 <div align="center">
   
 ![image](https://github.com/Akascape/Easy-Tier-List/assets/89206401/e33c2ae9-2be6-41b0-8864-d444d1e9ff9d)
