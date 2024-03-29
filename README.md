@@ -20,7 +20,7 @@
 
 ## DOWNLOAD 🔻
 
-### <p align='center'> Windows Version <br> <p align='center'> [<img src="https://img.shields.io/badge/FREE-DOWNLOAD-informational?&logo=Microsoft&logoColor=blue&color=007ec6" width="300">](https://github.com/Akascape/Easy-Tier-List/releases/download/v1.0/easy-tier-list_v1.0_win64.zip)  <p align='center'>
+### <p align='center'> Windows Version <br> <p align='center'> [<img src="https://img.shields.io/badge/FREE-DOWNLOAD-informational?&logo=Microsoft&logoColor=blue&color=007ec6" width="300">](https://github.com/Akascape/Easy-Tier-List/releases/download/v1.1/easy-tier-list_v1.1_win64.zip)  <p align='center'>
 
 <br> <p align='center'> **SOURCE CODE** <br> <p align='center'> [<img src="https://img.shields.io/badge/Python_Version-informational?style=flat&logo=python&logoColor=blue&color=eaea4a" width=200 height=40>](https://github.com/Akascape/Easy-Tier-List/archive/refs/heads/main.zip) <br> Don't forget to leave a ⭐ </p>
 
