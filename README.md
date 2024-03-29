@@ -24,7 +24,7 @@
 
 <br> <p align='center'> **SOURCE CODE** <br> <p align='center'> [<img src="https://img.shields.io/badge/Python_Version-informational?style=flat&logo=python&logoColor=blue&color=eaea4a" width=200 height=40>](https://github.com/Akascape/Easy-Tier-List/archive/refs/heads/main.zip) <br> Don't forget to leave a ⭐ </p>
 
-**CURRENT VERSION: 1.0**
+**CURRENT VERSION: 1.1**
 
 ## Example 🎨
 <div align="center">
