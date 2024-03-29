@@ -12,7 +12,9 @@
 - Add images from file
 - Import image directly from URL
 - Full drag and drop support
-- Arrange the content easily
+- Easily arrange the content
+- Customise colors and text
+- Full screen mode
 - Export as screenshot image
 - Save the data as file and reuse
 
