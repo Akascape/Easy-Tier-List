@@ -8,7 +8,7 @@
 
  Author: Akash Bora (Akascape)
  License: MIT
- Version: 1.0
+ Version: 1.1
 """
 
 import customtkinter
@@ -53,14 +53,14 @@ class App(CTk):
         self.icopath = ImageTk.PhotoImage(file=self.resource("logo.png"))
         self.wm_iconbitmap()
         self.iconphoto(False, self.icopath)
-        self.bind("<ButtonRelease-1>", lambda event: event.widget.focus_set(), add="+")
+        self.bind("<ButtonRelease-1>", lambda event: event.widget.focus_set() if type(event.widget) is not str else None, add="+")
         self.protocol("WM_DELETE_WINDOW", self.ask_leave)
         
         menu = CTkMenuBar(self)
         button_1 = menu.add_cascade("File")
         button_2 = menu.add_cascade("Add Category", command=self.new_category)
         button_3 = menu.add_cascade("Add Content", command=self.edit_content)
-        button_4 = menu.add_cascade("About", command=self.show_about)
+        button_4 = menu.add_cascade("Settings")
 
         dropdown1 = CustomDropdownMenu(widget=button_1, corner_radius=4, width=100)
         dropdown1.add_option(option="Open", command=self.open_template)
@@ -69,33 +69,73 @@ class App(CTk):
         self.submenu.add_option(option="JSON", command=self.save_template)
         self.submenu.add_option(option="JSON+Images", command=lambda: self.save_template(copy=True))
         self.submenu.add_option(option="Screenshot", command=self.export_image)
+
+        dropdown2 = CustomDropdownMenu(widget=button_4, corner_radius=4, width=100)
+        dropdown2.add_option(option="Adjust Font", command=self.adjust_font)
+        dropdown2.add_option(option="Adjust Theme", command=self.adjust_theme)
+        dropdown2.add_option(option="Toggle Fullscreen", command=self.toggle_fullscreen)
+        dropdown2.add_option(option="About", command=self.show_about)
         
         self.bg_frame = customtkinter.CTkFrame(self)
         self.bg_frame.pack(padx=10, pady=10, fill="both", expand=True)
 
-        self.frame_color = customtkinter.ThemeManager.theme["CTkFrame"]["top_fg_color"]
+        self.frame_color = self._apply_appearance_mode(customtkinter.ThemeManager.theme["CTkFrame"]["top_fg_color"])
+        self.frame_color2 = self._apply_appearance_mode(customtkinter.ThemeManager.theme["CTkFrame"]["fg_color"])
+
+        self.theme_colors = {"bg":self.frame_color2, "fg":self.frame_color, "txt":"black"}
+        
+        self.font_data = {"family":"default", "size":15, "weight":0, "slant":0, "underline":0}
+        self.global_font = customtkinter.CTkFont()
         
         self.blocks = {"S":{"fg":"#fe7e7e","content":[]}, "A":{"fg":"#ffbf7f","content":[]},
                        "B": {"fg":"#ffdf7f","content":[]}, "C":{"fg":"#ffff7f","content":[]},
                        "D":{"fg":"#bfff7f","content":[]}, "E":{"fg":"#7fff7f","content":[]}, "ALL":{"content":[]}}
-
+        
         self.frame_data = []
         
         for i in self.blocks:
             if i!="ALL":
                 self.make_category(i, self.blocks[i]["fg"])
-
+                
+        self.update_global_font()
+        
         self.content_frame = customtkinter.CTkScrollableFrame(self, height=150, orientation="horizontal",
                                                               label_text="TIERLIST")
         self.content_frame.pack(padx=10, pady=(0,10), fill="both")
-
+        
         self.blocks["ALL"].update({"frame":self.content_frame})
         
         self.drop_target_register(DND_ALL)
         self.dnd_bind("<<Drop>>", self.dropped_content)
+        
+        self.fullscreen = False
 
+        self.bind("<Escape>", lambda e: self.disable_fullscreen())
+        self.bind("<F11>", lambda e: self.toggle_fullscreen())
+        self.bind("<n>", lambda e: self.new_category())
+        self.bind("<f>", lambda e: self.adjust_font())
+        self.bind("<Control-s>", lambda e: self.save_template())
+        self.bind("<Control-o>", lambda e: self.open_template())
+        self.bind("<t>", lambda e: self.adjust_theme())
+        self.bind("<space>", lambda e: self.edit_content())
+        
+    def toggle_fullscreen(self):
+        if not self.fullscreen:
+            self.wm_attributes("-fullscreen", 1)
+            self.fullscreen = True
+        else:
+            self.wm_attributes("-fullscreen", 0)
+            self.fullscreen = False
+        self.resizable(True, True)
+        
+    def disable_fullscreen(self):
+        if self.fullscreen:
+            self.wm_attributes("-fullscreen", 0)
+            self.fullscreen = False
+            self.resizable(True, True)
+            
     def ask_leave(self):
-        res = CTkMessagebox(self, title="Exit", message="Do you want to close the program?",
+        res = CTkMessagebox(self, title="Exit?", message="Do you want to close the program?",
                             option_1="Cancel", option_2="No", option_3="Yes", icon="question")
         if res.get()=="Yes":
             self.destroy()
@@ -108,7 +148,7 @@ class App(CTk):
         return os.path.join(base_path, relative_path)
     
     def show_about(self):
-        CTkMessagebox(self, title="About", message="Easy-Tier-List \nAuthor: Akash Bora (Akascape) \nVersion: 1.0 \nLicense: MIT",
+        CTkMessagebox(self, title="About", message="Easy-Tier-List \nAuthor: Akash Bora (Akascape) \nVersion: 1.1 \nLicense: MIT",
                       icon=self.resource("logo.png"))
         
     def open_template(self, saved_data=False):
@@ -134,6 +174,21 @@ class App(CTk):
             if not os.path.exists(asset_folder):
                 CTkMessagebox(self, title="No Assets", message="This tierlist is missing the assets folder!", icon="cancel")
 
+        self.font_data = {"family":"default", "size":15, "weight":0, "slant":0, "underline":0}
+        
+        if "font" in self.blocks:
+            self.font_data = self.blocks["font"]
+            del self.blocks["font"]
+        self.update_global_font()
+
+
+        self.frame_color = self._apply_appearance_mode(customtkinter.ThemeManager.theme["CTkFrame"]["top_fg_color"])
+    
+        self.theme_colors = {"bg":self.frame_color2, "fg":self.frame_color, "txt":"black"}
+        
+        if "theme" in self.blocks:
+            self.theme_colors = self.blocks["theme"]
+            del self.blocks["theme"]
         
         for i in self.frame_data:
             i.destroy()
@@ -143,7 +198,7 @@ class App(CTk):
             for i in self.blocks:
                 if i!="ALL":
                     self.make_category(i, self.blocks[i]["fg"])
-                    
+        
             self.blocks["ALL"].update({"frame":self.content_frame})
             
             for i in self.content_frame.winfo_children():
@@ -160,13 +215,34 @@ class App(CTk):
                     self.new_content(j, frame=frame)
                 self.blocks[i]["content"] = new_list
             saved_data = {}
+            self.update_colors()
             self.content_frame.configure(label_text=os.path.basename(open_json).split(".")[0])
         except Exception as errors:
             self.blocks = {"ALL":{"content":[]}}
             CTkMessagebox(self, title="Invalid File", message="This file is not compatible!", icon="cancel")
             self.open_template(saved_data)
     
-        
+    def update_global_font(self):
+        if self.font_data["family"]!="default":
+            self.global_font.configure(family=self.font_data["family"])
+        else:
+            self.global_font.configure(family=customtkinter.ThemeManager.theme["CTkFont"]["family"])
+ 
+        self.global_font.configure(size=self.font_data["size"])
+            
+        if self.font_data["underline"]:
+            self.global_font.configure(underline=1)
+        else:
+            self.global_font.configure(underline=0)
+        if self.font_data["slant"]:
+            self.global_font.configure(slant="italic")
+        else:
+            self.global_font.configure(slant="roman")
+        if self.font_data["weight"]:
+            self.global_font.configure(weight="bold")
+        else:
+            self.global_font.configure(weight="normal")
+            
     def save_template(self, copy=False):
         
         template_data = {}
@@ -176,6 +252,9 @@ class App(CTk):
                 template_data.update({i:{"content":self.blocks[i]["content"]}})
             else:
                 template_data.update({i:{"fg":self.blocks[i]["fg"], "content":self.blocks[i]["content"]}})
+                
+        template_data.update({"font":self.font_data})
+        template_data.update({"theme":self.theme_colors})
         
         save_file = filedialog.asksaveasfilename(initialfile="", defaultextension=".json",
                                                  filetypes=[('json', ['*.json']),('All Files', '*.*')])
@@ -382,7 +461,6 @@ class App(CTk):
         entry_ = customtkinter.CTkEntry(toplevel, placeholder_text="Category Name", width=300)
         entry_.pack(fill="x", padx=5, pady=10)
         
-
         random_color = "#"+''.join([random.choice('ABCDEF0123456789') for i in range(6)])
 
         color = customtkinter.CTkButton(toplevel, text="Color", hover=False, border_width=2,
@@ -402,13 +480,193 @@ class App(CTk):
             toplevel.title("Edit Category")
 
         toplevel.grab_set()
+
+    def adjust_font(self):
+
+        def change_size(val):
+            self.global_font.configure(size=int(val))
+
+        def change_font_family(val):
+            self.global_font.configure(family=val)
+            if val=="default":
+                self.global_font.configure(family=customtkinter.ThemeManager.theme["CTkFont"]["family"])
+                
+        def toggle_bold():
+            if bold_box.get():
+                self.global_font.configure(weight="bold")
+            else:
+                self.global_font.configure(weight="normal")
+
+        def toggle_slant():
+            if italic_box.get():
+                self.global_font.configure(slant="italic")
+            else:
+                self.global_font.configure(slant="roman")
+
+        def toggle_underline():
+            if underline_box.get():
+                self.global_font.configure(underline=1)
+            else:
+                self.global_font.configure(underline=0)
+
+        def save():
+            if bold_box.get():
+                self.font_data.update({"weight":1})
+            if italic_box.get():
+                self.font_data.update({"slant":1})
+            if underline_box.get():
+                self.font_data.update({"underline":1})
+            if font_box.get()!="default":
+                self.font_data.update({"family":font_box.get()})
+                self.global_font.configure(family=font_box.get())
+            if int(size_slider.get())!=15:
+                self.font_data.update({"size":int(size_slider.get())})
+            toplevel.destroy()
+            
+        toplevel = customtkinter.CTkToplevel(self)
+        toplevel.resizable(False, False)
+        toplevel.transient(self)
+        toplevel.protocol("WM_DELETE_WINDOW", save)
+        
+        toplevel.title("Adjust Font and Size")
+        self.after(200, lambda: toplevel.iconphoto(False, self.icopath))
+
+        customtkinter.CTkLabel(toplevel, text="Text Font").pack(anchor="w", padx=12)
+        font = customtkinter.CTkFont(family="", size=10, )
+        
+        font_values = ["default"] + list(tkinter.font.families())
+        
+        font_box = customtkinter.CTkComboBox(toplevel, width=200, values=font_values, command=change_font_family)
+        font_box.pack(expand=True, fill="x", padx=10, pady=5)
+        font_box.set(self.font_data["family"])
+        
+        label_ = customtkinter.CTkLabel(toplevel, text="Font Size")
+        label_.pack(anchor="w", padx=12)
+        
+        size_slider = customtkinter.CTkSlider(toplevel, from_=10, to=35, number_of_steps=10, command=change_size)
+        size_slider.pack(expand=True, fill="x", padx=8)
+        size_slider.set(self.font_data["size"])
+        
+        frame = customtkinter.CTkFrame(toplevel, fg_color="transparent")
+        frame.pack(pady=10, padx=(15,0))
+        
+        bold_box = customtkinter.CTkCheckBox(frame, text="Bold", command=toggle_bold)
+        bold_box.pack(side="left")
+
+        if self.font_data["weight"]:
+            bold_box.select()
+    
+        italic_box = customtkinter.CTkCheckBox(frame, text="Italic", command=toggle_slant)
+        italic_box.pack(side="left")
+
+        if self.font_data["slant"]:
+            italic_box.select()
+                       
+        underline_box = customtkinter.CTkCheckBox(frame, text="Underline", command=toggle_underline)
+        underline_box.pack(side="left")
+        
+        if self.font_data["underline"]:
+            underline_box.select()
+                       
+        ok = customtkinter.CTkButton(toplevel, text="OK", command=save)
+        ok.pack(expand=True, fill="x", side="bottom", padx=10, pady=(0,10))
+        
+        spawn_x = int(self.winfo_width() * .5 + self.winfo_x() - .5 * 300 + 7)
+        spawn_y = int(self.winfo_height() * .5 + self.winfo_y() - .5 * toplevel.winfo_height() + 20)
+        toplevel.geometry(f"+{spawn_x}+{spawn_y}")
+
+        toplevel.grab_set()
+
+    def update_colors(self):
+        for i in self.frame_data:
+            i.configure(fg_color=self.theme_colors["fg"])
+            for j in i.winfo_children():
+                if type(j) is tkinter.Label:
+                     j.configure(bg=self.theme_colors["fg"])
+                elif type(j) is customtkinter.CTkButton:
+                    j.configure(text_color=self.theme_colors["txt"])
+                    
+        self.bg_frame.configure(fg_color=self.theme_colors["bg"])
+        
+    def adjust_theme(self):
+
+        def change_fg():
+            color_box = AskColor(title=f"Choose FG Color")
+            self.after(200, lambda: color_box.iconphoto(False, self.icopath))
+            new_color = color_box.get()
+            if not new_color:
+                new_color = self._apply_appearance_mode(customtkinter.ThemeManager.theme["CTkFrame"]["top_fg_color"])
+                
+            self.theme_colors.update({"fg":new_color})
+            self.frame_color = new_color
+            bt1.configure(fg_color=new_color)
+            self.update_colors()
+                
+        def change_bg():
+            color_box = AskColor(title=f"Choose BG Color")
+            self.after(200, lambda: color_box.iconphoto(False, self.icopath))
+            new_color = color_box.get()
+            if not new_color:
+                new_color = self.frame_color2
+                
+            self.theme_colors.update({"bg":new_color})
+            bt2.configure(fg_color=new_color)
+            self.update_colors()
+            
+        def change_txt():
+            color_box = AskColor(title=f"Choose Text Color")
+            self.after(200, lambda: color_box.iconphoto(False, self.icopath))
+            new_color = color_box.get()
+            if not new_color:
+                new_color = "black"
+                
+            self.theme_colors.update({"txt":new_color})
+            bt3.configure(fg_color=new_color)
+            self.update_colors()
+                
+        toplevel = customtkinter.CTkToplevel(self)
+        toplevel.resizable(False, False)
+        toplevel.transient(self)
+        
+        toplevel.title("Adjust Colors")
+        self.after(200, lambda: toplevel.iconphoto(False, self.icopath))
+        
+        frame1 = customtkinter.CTkFrame(toplevel, fg_color="transparent")
+        frame1.pack(expand=True, fill="x", padx=10, pady=5)
+
+        customtkinter.CTkLabel(frame1, width=100, anchor="w", text="FG Color").pack(side="left", padx=(0,10))
+        bt1 = customtkinter.CTkButton(frame1, text="", hover=False, fg_color=self.theme_colors["fg"],
+                                      width=30, border_width=2, command=change_fg)
+        bt1.pack(side="right")
+
+        frame2 = customtkinter.CTkFrame(toplevel, fg_color="transparent")
+        frame2.pack(expand=True, fill="x", padx=10, pady=5)
+
+        customtkinter.CTkLabel(frame2, text="BG Color").pack(side="left", padx=(0,10))
+        bt2 = customtkinter.CTkButton(frame2, text="", hover=False, fg_color=self.theme_colors["bg"],
+                                      width=30, border_width=2, command=change_bg)
+        bt2.pack(side="right")
+
+        frame3 = customtkinter.CTkFrame(toplevel, fg_color="transparent")
+        frame3.pack(expand=True, fill="x", padx=10, pady=5)
+
+        customtkinter.CTkLabel(frame3, text="Text Color").pack(side="left", padx=(0,10))
+        bt3 = customtkinter.CTkButton(frame3, text="", hover=False, fg_color=self.theme_colors["txt"],
+                                      width=30, border_width=2, command=change_txt)
+        bt3.pack(side="right")
+        
+        spawn_x = int(self.winfo_width() * .5 + self.winfo_x() - .5 * 300 + 7)
+        spawn_y = int(self.winfo_height() * .5 + self.winfo_y() - .5 * toplevel.winfo_height() + 20)
+        toplevel.geometry(f"+{spawn_x}+{spawn_y}")
+
+        toplevel.grab_set()
         
     def make_category(self, text, color):
 
         frame = customtkinter.CTkFrame(self.bg_frame, fg_color=self.frame_color)
         frame.pack(expand=True, fill="both", pady=5)
 
-        button = customtkinter.CTkButton(frame, width=100, text_color="black", 
+        button = customtkinter.CTkButton(frame, width=100, text_color="black", font=self.global_font,
                                         text=text, fg_color=color, hover=False)
         button.pack(fill="y", side="left")
         button._text_label.config(wraplength=90)
@@ -417,7 +675,7 @@ class App(CTk):
 
         self.blocks[text].update({"frame":frame})
         
-        menu = tkinter.Menu(button, tearoff=False, background=self.frame_color[1], fg='white', borderwidth=0, bd=0)
+        menu = tkinter.Menu(button, tearoff=False, background=self.frame_color, fg='white', borderwidth=0, bd=0)
             
         menu.add_command(label="Delete Category", command=lambda frame=frame: self.clear_list(frame, delete=True))
         menu.add_command(label="Clear List", command=lambda frame=frame: self.clear_list(frame))
@@ -568,8 +826,8 @@ class App(CTk):
         if frame==self.content_frame:
             frame_color = customtkinter.ThemeManager.theme["CTkFrame"]["fg_color"][1]
         else:
-            frame_color = self.frame_color[1]
-
+            frame_color = self.frame_color
+            
         tile = tkinter.Label(frame, bg=frame_color, image=img, height=20, width=100, text=None)
         tile.image = img
         
